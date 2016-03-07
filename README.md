@@ -6,7 +6,7 @@ a copy of [reagent-template](https://github.com/reagent-project/reagent-template
 
 clone this repository and
 
-        npm install && npm run build
+        npm install 
         lein figwheel
 
 ## installing npm modules
