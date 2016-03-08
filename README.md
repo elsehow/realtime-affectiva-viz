@@ -9,11 +9,18 @@ clone this repository and
         npm install 
         lein figwheel
 
+and go to http://locahost:3449
+
+for devcards
+
+        lein figwheel devcards
+
 ## installing npm modules
 
         npm install [my module]
         npm run build
 
+and go to http://locahost:3449/devcards
 
 ## how does it work?
 
