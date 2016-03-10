@@ -7,26 +7,8 @@
     :as dc
     :refer [defcard defcard-doc defcard-rg deftest]]))
 
-(defn get-webcam [errcb successcb]
-  (window.getusermedia
-   #js {:video true :audio false}
-   (fn [err stream]
-     (if err
-       (errcb err)
-       (successcb stream)))))
-
-(defn get-and-show-webcam []
-  (let [webcam-div (.getElementById js/document "webcam")]
-    (get-webcam
-     #(println "ERR!" %)
-     #(window.attachmediastream % webcam-div
-       ))))
-
 (defcard-rg webcam-card
-  (reagent/create-class
-   {:reagent-render (fn [] [:video
-                           {:id "webcam"}])
-    :component-did-mount get-and-show-webcam})) 
+  [core/setup-webcam-and-view])
 
 ;(defcard-rg graph-card
 ;  [core/expression-graph :expressions])

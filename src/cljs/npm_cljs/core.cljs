@@ -9,6 +9,53 @@
   (let [stringify #(.stringify js/JSON (clj->js %) nil 2)]
     [:div>pre (stringify clj-type)]))
 
+;; app state
+
+(defonce store (atom nil))
+
+(def aff-api-endpoint
+  "http://verdigris.ischool.berkeley.edu:3334")
+
+(def chunk-time
+  1000)
+
+(defn get-webcam [errcb successcb]
+  (window.getusermedia
+   #js {:video true :audio false}
+   (fn [err stream]
+     (if err
+       (errcb err)
+       (successcb stream)))))
+
+(defn setup-chunk-upload [stream]
+  (let [chunk
+        (window.chunky stream chunk-time aff-api-endpoint)
+        socket (.-socket chunk)]
+    (.on socket "data"
+         #(reset! store (js->clj % :keywordize-keys true))
+    (.on socket "error"
+         #(println "socket error " %))
+    )))
+
+(defn get-and-show-webcam []
+  (let [webcam-div
+        (.getElementById js/document "webcam")]
+    (get-webcam
+     #(println "ERR!" %)
+     (fn [stream]
+       (window.attachmediastream stream webcam-div)
+       (setup-chunk-upload stream)
+       ))))
+
+(defn setup-webcam-and-view []
+  (reagent/create-class
+   {:reagent-render (fn [] [:video
+                           {:id "webcam"
+                            :style {:height 300}}
+                            ])
+    :component-did-mount get-and-show-webcam}))
+
+
 
 ;; -------------------------
 ;; Views
@@ -60,8 +107,8 @@
 
 ;; example data
 
-(defonce example-data
-  (js->clj window.exampledata :keywordize-keys true))
+;(defonce example-data
+;  (js->clj window.exampledata :keywordize-keys true))
 
 
 (defn get-over-time [data & keys]
@@ -92,7 +139,7 @@
 ; d3 stuff
 
 (defn graph-div-did-mount [div-id my-data]
-  (fn [] 
+  (fn []
     (.addGraph js/nv (fn []
                        (let [chart (.. js/nv -models lineChart
                                        (margin #js {:left 100})
@@ -108,7 +155,10 @@
                              (tickFormat (.format js/d3 ",r")))
                          (.. js/d3 (select (str "#" div-id " svg"))
                              (datum (clj->js my-data))
-                             (call chart)))))))
+                             (call chart))
+                         (println (.update chart))
+                         )))
+    ))
 
 (defn d3-svg [div-id]
   (fn []
@@ -117,10 +167,10 @@
      :style {:width "750" :height "260"}}
      [:svg ]]))
 
-(defn expression-graph [keyword]
-  (let [expressions (data-over-time keyword example-data)]
-    ;(if (not? (every? zero? (map :x expressions))))
-    (reagent/create-class {:reagent-render (d3-svg (name keyword))
+(defn expression-graph [keyword data]
+  (let [expressions (data-over-time keyword data)]
+    (reagent/create-class {:reagent-render (d3-svg
+                                            (name keyword))
                            :component-did-mount
                            (graph-div-did-mount
                             (name keyword)
@@ -128,12 +178,17 @@
                            })))
 
 
-
-
-
 (defn home-page []
-  [:div [:h2 "Welcome "]
-   [:div [:a {:href "/about"} "go to about page"]]])
+  [:div
+   [setup-webcam-and-view]
+   (if @store
+     [expression-graph :emotions @store]
+     [:p "waiting for data! please hold.."]
+     )
+     ])
+;
+;   [:h2 "Welcome "]
+;   [:div [:a {:href "/about"} "go to about page"]]])
 
 
 
