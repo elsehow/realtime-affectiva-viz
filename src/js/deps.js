@@ -1,6 +1,10 @@
 // include your npm moodules here
 //window.lodash = require('lodash')
 
+window.getusermedia = require('getusermedia')
+
+window.attachmediastream= require('attachmediastream')
+
 window.exampledata = [
     {
         "date and time": "3-8-2016 11:59:33",

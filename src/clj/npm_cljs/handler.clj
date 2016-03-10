@@ -18,18 +18,26 @@
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport"
              :content "width=device-width, initial-scale=1"}]
-     (include-css (if (env :dev) "/css/site.css" "/css/site.min.css"))]
+    (include-css (if (env :dev) "/css/site.css" "/css/site.min.css"))
+    (include-css "//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.css")
+    ]
     [:body
      mount-target
+     (include-js "//cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.js")
+     (include-js "//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.js")
      (include-js "/js/deps-bundle.js")
      (include-js "/js/app.js")]))
 
 (def cards-page
   (html5
    [:head
-     [:meta {:charset "utf-8"}]]
+    [:meta {:charset "utf-8"}]
+    ;(include-css "//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.css")
+    ]
     [:body
      mount-target
+     (include-js "//cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.js")
+     (include-js "//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.js")
      (include-js "/js/deps-bundle.js")
      (include-js "/js/app_devcards.js")]))
 
