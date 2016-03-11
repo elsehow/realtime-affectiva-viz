@@ -93,9 +93,9 @@ function handle (data) {
     data.length
   )
   //mutate app state + update graphs
-  _.forEach(data, m_em)
+  data.forEach(m_em)
   emotions_graph.update()
-  _.forEach(data, m_ex)
+  data.forEach(m_ex)
   expressions_graph.update()
   return
 }
@@ -164,12 +164,12 @@ module.exports = function (chart_el, legend_el, series_data) {
   // render graph
   graph.render()
   
-  // x axis
-  new Rickshaw.Graph.Axis.Time( {
-    graph: graph,
-    ticksTreatment: 'glow',
-    timeFixture: new Rickshaw.Fixtures.Time
-  }).render()
+//  // x axis
+//  new Rickshaw.Graph.Axis.Time( {
+//    graph: graph,
+//    ticksTreatment: 'glow',
+//    timeFixture: new Rickshaw.Fixtures.Time
+//  }).render()
   
   // y axis
   new Rickshaw.Graph.Axis.Y( {

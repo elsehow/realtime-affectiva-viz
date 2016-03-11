@@ -92,9 +92,9 @@ function handle (data) {
     data.length
   )
   //mutate app state + update graphs
-  _.forEach(data, m_em)
+  data.forEach(m_em)
   emotions_graph.update()
-  _.forEach(data, m_ex)
+  data.forEach(m_ex)
   expressions_graph.update()
   return
 }

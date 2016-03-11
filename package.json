@@ -1,7 +1,8 @@
 {
   "name": "realtime-affectiva-viz",
   "scripts": {
-    "watch": "watchify index.js -o bundle.js"
+    "watch": "watchify index.js -o bundle.js",
+    "build": "browserify index.js | java -jar compiler.jar --language_out=ES5 > bundle.js; html-inline -i index.html -o dist/index.html"
   },
   "repository": {
     "type": "git",
@@ -15,12 +16,14 @@
   "homepage": "https://github.com/elsehow/realtime-affectiva-viz#readme",
   "dependencies": {
     "attachmediastream": "^1.3.5",
+    "babelify": "^7.2.0",
     "chunky-webcam": "0.0.1",
     "getusermedia": "^1.3.7",
     "lodash": "^4.6.1",
     "rickshaw": "^1.5.1"
   },
   "devDependencies": {
+    "browserify": "^13.0.0",
     "watchify": "^3.7.0"
   }
 }

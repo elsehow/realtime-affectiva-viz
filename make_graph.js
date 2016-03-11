@@ -35,12 +35,12 @@ module.exports = function (chart_el, legend_el, series_data) {
   // render graph
   graph.render()
   
-  // x axis
-  new Rickshaw.Graph.Axis.Time( {
-    graph: graph,
-    ticksTreatment: 'glow',
-    timeFixture: new Rickshaw.Fixtures.Time
-  }).render()
+//  // x axis
+//  new Rickshaw.Graph.Axis.Time( {
+//    graph: graph,
+//    ticksTreatment: 'glow',
+//    timeFixture: new Rickshaw.Fixtures.Time
+//  }).render()
   
   // y axis
   new Rickshaw.Graph.Axis.Y( {
