@@ -1,13 +1,19 @@
-#webcam {
-display:block;
-}
-.rickshaw_graph {
-float:left;
+
+.graph-container {
+  display: block;
 }
 
+.rickshaw_graph, rickshaw_legend {
+  float: left;
+}
+
+#error {
+  color: red;
+  font-weight:bold;
+  font-size:3em;
+}
 
 .rickshaw_legend {
-  float: left;
   font-family: Arial;
   font-size: 12px;
   color: white;

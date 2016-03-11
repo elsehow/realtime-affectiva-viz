@@ -2,18 +2,20 @@ var chunky = require('chunky-webcam')
   , _ = require('lodash')
   , getUserMedia = require('getusermedia')
   , attachMediaStream = require('attachmediastream')
-  // element in which we show video
-  , video_el = document.getElementById('webcam')
-  // element in which we show server messages
-  , expressions_chart_el = document.getElementById('expressions-chart')
-  , emotions_chart_el = document.getElementById('emotions-chart')
-  , expressions_legend_div = document.getElementById('expressions-legend')
-  , Rickshaw = require('rickshaw')
+  , el = id => document.getElementById(id)
+  // html elements
+  , video_el = el('webcam')
+  , expressions_chart_el = el('expressions-chart')
+  , expressions_legend_el = el('expressions-legend')
+  , emotions_chart_el = el('emotions-chart')
+  , emotions_legend_el = el('emotions-legend')
+  , error_el = el('error')
 
 
 // config
-var resolution = 3000
-var aff_api_endpoint = 'http://verdigris.ischool.berkeley.edu:3334'
+var resolution = 3500
+  , aff_api_endpoint = 'https://verdigris.ischool.berkeley.edu:3333'
+  , video_err_message =  "I can't see your face! :c try moving to a better-lit place, and make sure your face fits in the frame. dont blame us!! this SDK is pretty picky."
 
 // mutable app store (for rickshaw)
 var store = {
@@ -46,105 +48,79 @@ var store = {
   }
 }
 
-// setup rickshaw graph
-var palette = new Rickshaw.Color.Palette( { scheme: 'spectrum2000' } )
-var graph = new Rickshaw.Graph({
-  element: expressions_chart_el,
-  width: 600,
-  height: 150,
-  renderer: "line",
-  //preserve: true,
-  //stroke: true,
-  series: _.map(store.expressions, (arr, name) => {
-    return {
-      color: palette.color(),
-      data: arr,
-      name: name
-    }
-  })
-})
-// legend
-var legend = new Rickshaw.Graph.Legend( {
-  graph: graph,
-  element: expressions_legend_div,
-
-})
-// hover detail
-var hoverDetail = new Rickshaw.Graph.HoverDetail( {
-  graph: graph,
-  xFormatter: x => x
-})
-// render graph
-graph.render()
-
-// x axis
-new Rickshaw.Graph.Axis.Time( {
-  graph: graph,
-  ticksTreatment: 'glow',
-  timeFixture: new Rickshaw.Fixtures.Time.Local()
-}).render()
-
-// y axis
-new Rickshaw.Graph.Axis.Y( {
-  graph: graph,
-  tickFormat: Rickshaw.Fixtures.Number.formatKMBT,
-  ticksTreatment: 'glow',
-}).render()
-
-// highlighter
-new Rickshaw.Graph.Behavior.Series.Highlight( {
-  graph: graph,
-  legend: legend
-} );
-
-
-function handle (data) {
-  if (data.error) 
-    console.log('ERR!', data.error)
-  else
-    data.forEach(mutate_store)
-    //console.log(graph.series)
-    graph.update()
-  return
-}
-
-function mutate_store (new_data, i) {
-  _.forEach(store.expressions, (arr, exp) => {
-    var y = new_data.expressions[exp]
-    var l = store.expressions[exp]
-    l.push({x: i, y: y})
-    if (l.length > 100)
+function mutate_store (key, max, new_data, i) {
+  //var d = new Date(new_data['date and time'])
+  _.forEach(store[key], (arr, exp) => {
+    var y = new_data[key][exp]
+    var l = store[key][exp]
+    l.push({
+      x: i,
+      y: y,
+    })
+    if (l.length > max)
       l.shift()
   }) 
 }
 
+var make_graph = require('./make_graph')
+
+var emotions_graph = make_graph(
+  emotions_chart_el, 
+  emotions_legend_el,
+  store.emotions
+)
+
+var expressions_graph = make_graph(
+  expressions_chart_el, 
+  expressions_legend_el,
+  store.expressions
+)
 
 
-// get user webcam
+function handle (data) {
+  // clear error message, if any
+  error_el.innerHTML = ""
+  // functions for mutating app state
+  var m_em = _.partial(
+    mutate_store, 
+    'emotions', 
+    data.length
+  )
+  var m_ex = _.partial(
+    mutate_store, 
+    'expressions', 
+    data.length
+  )
+  //mutate app state + update graphs
+  _.forEach(data, m_em)
+  emotions_graph.update()
+  _.forEach(data, m_ex)
+  expressions_graph.update()
+  return
+}
+
+
+function handle_video_error (err) {
+  error_el.innerHTML = video_err_message
+}
+
+
+
+// app entrypoint
 getUserMedia({ video: true, audio: false}, (err, stream) => {
 
-    // if the browser doesn't support user media 
-    // or the user says "no" the error gets passed 
-    // as the first argument. 
-    if (err)
-        document.write('failed getting your webcam!', err);
+  if (err)
+    document.write('failed getting your webcam!', err)
+  
+  attachMediaStream(stream,video_el, {
+    muted: true,
+    mirror: true,
+  })
+  
+  chunk = chunky(stream, resolution, aff_api_endpoint)
 
-    //else
-    //    console.log('got stream!', stream)
+  chunk.socket.on('data', handle)
+  chunk.socket.on('video-error', handle_video_error) 
 
-    // put the webcam stream in a video element
-    attachMediaStream(stream,video_el, {
-        muted: true,
-        mirror: true,
-    })
-
-    // setup chunky-webcam, with our stream
-    // it will record 1000ms chunks,
-    // and send them with a 'video' event to 'localhost:9999'
-    // where our server runs
-    chunk = chunky(stream, resolution, aff_api_endpoint)
-
-    // our server will send 'data' events
-    chunk.socket.on('data', handle)
 })
 
