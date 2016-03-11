@@ -1,0 +1,35 @@
+* realtime updating charts
+<2016-03-10 Thu>
+** TODO [[http://blog.getliquidlandscape.com/2015/01/08/practical-time-series-visualization-using-d3-om/][d3+om]]
+*** shared async state
+**** NOT the data
+***** thats app state
+**** rather, /how to display the data/
+**** eventually consistent views
+***** component A rendering at 10Hz
+***** component B rendering at 1Hz
+*** timestamp =:ts= is a shared async state
+** TODO in rickshaw
+*** DONE understand basic graph
+CLOSED: [2016-03-10 Thu 18:59]
+*** DONE understand how updating works (in theory)
+CLOSED: [2016-03-10 Thu 18:59]
+*** DONE new branch
+CLOSED: [2016-03-10 Thu 18:59]
+*** DONE instal rickshaw
+CLOSED: [2016-03-10 Thu 18:59]
+*** DONE remove dumb nvd3 deps
+CLOSED: [2016-03-10 Thu 18:59]
+*** TODO simple graph working in devcards
+*** TODO mock that pushes "stream" of aff data
+**** just get one more thing from server
+**** stick it in deps, make it a list of lists
+**** now =(map-indexed #(set-interval ... (* 1000 idx)) (cycle..)=
+*** TODO architect update thing as it should work
+*** TODO move to core.cljs
+*** TODO 
+* if time
+
+** dark theme on graphs
+
+** single html build
